@@ -158,6 +158,7 @@
                     </view>
                     <connections>
                         <outlet property="finishLocationFiled" destination="Lgv-mx-Zlz" id="4jc-Xs-OcP"/>
+                        <outlet property="goButton" destination="NfT-WN-kCT" id="xto-gY-H1e"/>
                         <outlet property="startLocationField" destination="ONC-9G-vCs" id="HTo-h6-3ge"/>
                     </connections>
                 </viewController>

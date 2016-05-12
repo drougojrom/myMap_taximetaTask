@@ -18,8 +18,11 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     var myRoute : MKRoute?
     
+    // region and location names
+    var regionArrayHelper = [NSString]()
     var mapArrayHelper = [String]()
 
+    // coordinates for first and second location
     var coordinateOne = CLLocationCoordinate2D()
     var coordinateTwo = CLLocationCoordinate2D()
     
@@ -32,11 +35,12 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         self.mapView.delegate = self
     }
     
+    // code string into location
+    
     @IBAction func getYourRoute(sender: UIButton) {
         
         let geocoder = CLGeocoder()
         let secondGeocoder = CLGeocoder()
-        
         geocoder.geocodeAddressString(startLocationLabel.text!, completionHandler: { (placemarks, error) -> Void in
             
             if(error != nil) {
@@ -46,6 +50,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             if let placemark = placemarks?.first {
                 let coordinates: CLLocationCoordinate2D = placemark.location!.coordinate
                 self.coordinateOne = coordinates
+                let country1 = placemark.addressDictionary?["Country"] as? NSString
+                self.regionArrayHelper.append(country1!)
+                self.findLocations(self.coordinateOne, coordinateTwo: self.coordinateTwo)
             }
         })
         
@@ -58,27 +65,32 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             if let placemark = placemarks?.first {
                 let coordinates: CLLocationCoordinate2D = placemark.location!.coordinate
                 self.coordinateTwo = coordinates
+                let country2 = placemark.addressDictionary?["Country"] as? NSString
+                self.regionArrayHelper.append(country2!)
+                self.findLocations(self.coordinateOne, coordinateTwo: self.coordinateTwo)
             }
         
         })
+        print(regionArrayHelper)
         print(coordinateOne)
         print(coordinateTwo)
-        findLocations(coordinateOne, coordinateTwo: coordinateTwo)
+        
     }
     
+    // find locations using coordinates from geocoder
     func findLocations(coordinateOne: CLLocationCoordinate2D, coordinateTwo: CLLocationCoordinate2D) {
     
         let point1 = MKPointAnnotation()
         let point2 = MKPointAnnotation()
         point1.coordinate = CLLocationCoordinate2DMake(coordinateOne.latitude, coordinateOne.longitude)
         //point1.coordinate = CLLocationCoordinate2DMake(54.5293000, 36.2754200)
-        point1.title = "Kaluga"
-        point1.subtitle = "Russia"
+        point1.title = mapArrayHelper.first!
+        point1.subtitle = String(regionArrayHelper.first!)
         mapView.addAnnotation(point1)
         
         point2.coordinate = CLLocationCoordinate2DMake(coordinateTwo.latitude, coordinateTwo.longitude)
-        point2.title = "Maloyaroslavest"
-        point2.subtitle = "Russia"
+        point2.title = mapArrayHelper.last!
+        point2.subtitle = String(regionArrayHelper.last!)
         mapView.addAnnotation(point2)
         
         
@@ -106,8 +118,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 self.mapView.addOverlay((self.myRoute?.polyline)!)
             }
         })
+        
     }
-    
+    // draw the route
     func mapView(mapView: MKMapView, rendererForOverlay overlay: MKOverlay) -> MKOverlayRenderer {
         
         let polylineRenderer = MKPolylineRenderer(overlay: overlay)
@@ -123,8 +136,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
+    // go to the previous viewController
     @IBAction func dismissViewController(sender: UIBarButtonItem) {
+        
         self.dismissViewControllerAnimated(true, completion: nil)
     }
     
