@@ -64,7 +64,6 @@ class ChooseLocationViewController: UIViewController {
         buttonEnabled = false
         goButton.enabled = buttonEnabled
         
-        performSegueWithIdentifier("ShowLocation", sender: self)
     }
     
     func arrayCount(var arrayHelper: [String]) -> Bool {

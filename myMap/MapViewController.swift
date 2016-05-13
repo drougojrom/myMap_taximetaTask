@@ -31,16 +31,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         startLocationLabel.text = mapArrayHelper.first!
         endLocationLabel.text = mapArrayHelper.last!
-        
-        self.mapView.delegate = self
-    }
-    
-    // code string into location
-    
-    @IBAction func getYourRoute(sender: UIButton) {
-        
+
         let geocoder = CLGeocoder()
-        let secondGeocoder = CLGeocoder()
         geocoder.geocodeAddressString(startLocationLabel.text!, completionHandler: { (placemarks, error) -> Void in
             
             if(error != nil) {
@@ -52,7 +44,34 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 self.coordinateOne = coordinates
                 let country1 = placemark.addressDictionary?["Country"] as? NSString
                 self.regionArrayHelper.append(country1!)
-                self.findLocations(self.coordinateOne, coordinateTwo: self.coordinateTwo)
+                
+                self.findLocations(self.coordinateOne, coordinateTwo: self.coordinateOne)
+            }
+        })
+        
+        self.mapView.delegate = self
+        
+    }
+    
+    // code string into location
+    
+    @IBAction func getYourRoute(sender: UIButton) {
+        
+        let geocoder = CLGeocoder()
+        let secondGeocoder = CLGeocoder()
+        
+        geocoder.geocodeAddressString(startLocationLabel.text!, completionHandler: { (placemarks, error) -> Void in
+            
+            if(error != nil) {
+                print("\(error)")
+            }
+            
+            if let placemark = placemarks?.first {
+                let coordinates: CLLocationCoordinate2D = placemark.location!.coordinate
+                self.coordinateOne = coordinates
+                let country1 = placemark.addressDictionary?["Country"] as? NSString
+                self.regionArrayHelper.append(country1!)
+
             }
         })
         
@@ -67,19 +86,19 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 self.coordinateTwo = coordinates
                 let country2 = placemark.addressDictionary?["Country"] as? NSString
                 self.regionArrayHelper.append(country2!)
+                
                 self.findLocations(self.coordinateOne, coordinateTwo: self.coordinateTwo)
             }
         
         })
-        print(regionArrayHelper)
-        print(coordinateOne)
-        print(coordinateTwo)
+//        print(regionArrayHelper)
+//        print(coordinateOne)
+//        print(coordinateTwo)
         
     }
     
     // find locations using coordinates from geocoder
     func findLocations(coordinateOne: CLLocationCoordinate2D, coordinateTwo: CLLocationCoordinate2D) {
-    
         let point1 = MKPointAnnotation()
         let point2 = MKPointAnnotation()
         point1.coordinate = CLLocationCoordinate2DMake(coordinateOne.latitude, coordinateOne.longitude)
@@ -140,6 +159,31 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     @IBAction func dismissViewController(sender: UIBarButtonItem) {
         
         self.dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    
+    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+
+        let userLocation: CLLocation = locations[0]
+        let latitude = userLocation.coordinate.latitude
+        let longitude = userLocation.coordinate.longitude
+        
+        let latDelta:CLLocationDegrees = 0.05
+        let lonDelta:CLLocationDegrees = 0.05
+        let span:MKCoordinateSpan = MKCoordinateSpanMake(latDelta, lonDelta)
+        
+        let location:CLLocationCoordinate2D = CLLocationCoordinate2DMake(latitude, longitude)
+        let region:MKCoordinateRegion = MKCoordinateRegionMake(location, span)
+        
+        self.mapView.setRegion(region, animated: false)
+        
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = location
+        annotation.title = "This is your location"
+        
+        annotation.subtitle = "Lat. " + String(stringInterpolationSegment: latitude) + ", Lon. " + String(stringInterpolationSegment: longitude)
+        
+        mapView.addAnnotation(annotation)
     }
     
 }
